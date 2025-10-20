@@ -4,6 +4,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.simple_api import router as fraud_router
+from app.simple_fraud_detection import fraud_detector
 import logging
 
 # 로깅 설정
@@ -29,6 +30,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 서버 시작 시 모델 로드
+@app.on_event("startup")
+async def startup_event():
+    logger.info("AI 서버 시작 중...")
+    success = fraud_detector.load_model()
+    if success:
+        logger.info("✅ 모델 로드 완료 - 훈련됨")
+    else:
+        logger.info("⚠️ 모델 로드 실패 - 미훈련 상태")
 
 # 라우터 등록
 app.include_router(fraud_router, prefix="/ai", tags=["fraud-detection"])
