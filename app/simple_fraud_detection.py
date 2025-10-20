@@ -103,8 +103,16 @@ class SimpleFraudDetection:
             anomaly_score = self.model.decision_function(feature_scaled)[0]
             is_anomaly = self.model.predict(feature_scaled)[0] == -1
             
-            # 위험도 점수 (0-100)
-            risk_score = max(0, min(100, (1 - anomaly_score) * 50))
+            # 위험도 점수 (0-100) - 조정된 공식
+            # 더 관대한 위험도 평가
+            if is_anomaly:
+                # 이상거래: anomaly_score가 음수일 때 위험도 증가
+                # -0.5 ~ -0.1 범위를 50-100점으로 매핑 (더 관대하게)
+                risk_score = max(50, min(100, 50 + abs(anomaly_score) * 100))
+            else:
+                # 정상거래: anomaly_score가 양수일 때 위험도 감소
+                # 0.1 ~ 0.5 범위를 0-30점으로 매핑 (더 안전하게)
+                risk_score = max(0, min(30, anomaly_score * 60))
             
             # 신뢰도
             confidence = abs(anomaly_score) * 100
