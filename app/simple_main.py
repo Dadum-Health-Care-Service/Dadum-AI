@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.simple_api import router as fraud_router
 from app.simple_fraud_detection import fraud_detector
+from app.ai_yolo import router as ai_router
 import logging
 
 # 로깅 설정
@@ -43,6 +44,7 @@ async def startup_event():
 
 # 라우터 등록
 app.include_router(fraud_router, prefix="/ai", tags=["fraud-detection"])
+app.include_router(ai_router)
 
 @app.get("/")
 async def root():
